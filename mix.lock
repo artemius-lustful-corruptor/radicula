@@ -1,0 +1,4 @@
+%{
+  "eredis": {:hex, :eredis, "1.4.1", "c02f54adb4d3c36ebad69a0258258b9036155dbbcecf4f89d220497667d8cf62", [:mix, :rebar3], [], "hexpm", "a5ce0b329fe080524c90726a3a37da07a8e243d720e9ddf005b99e7efcfcbe72"},
+  "exredis": {:hex, :exredis, "0.3.0", "2530d9d8d5a98c5bc80bf7a14e15440a88abd6457618682f10851e39ebdd518b", [:mix], [{:eredis, ">= 1.0.8", [hex: :eredis, repo: "hexpm", optional: false]}], "hexpm", "4740d8f95e0e94ab1adac95331630e8c36e77def64c0bc953dc0779c8e82fe63"},
+}
