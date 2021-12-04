@@ -19,18 +19,17 @@ defmodule Radicula.RedisClient do
     client |> sadd(key, value)
   end
 
-  def get_members(client, type, key) do
-    case type do
-      :set ->  client |> smembers(key)
-    end
+  def get_members(client, key) do
+    client |> smembers(key)
   end
 
-  def length(client, key) do
-    client |> llen(key)
+  def length(client, queue) do
+    client |> llen(queue)
+  end
+
+  def remove(client, queue, key) do
+    client |> srem(queue, key)
   end
 
   # HELPERS
-
-
-
 end

@@ -3,6 +3,8 @@ defmodule Radicula.GeneratorSrv do
 
   require Logger
 
+  alias Radicula.RedisSrv, as: RS
+  
   @n 1000
   @interval 1000
   # Client
@@ -27,7 +29,8 @@ defmodule Radicula.GeneratorSrv do
   @impl true
   def handle_info(:update, state) do
     r = :rand.uniform(@n) + 1
-    IO.inspect("#{state.id}-#{r}")
+    #IO.inspect("#{state.id}-#{r}")
+    RS.set(:list, r)
     scheduled_run()
     {:noreply, state}
   end

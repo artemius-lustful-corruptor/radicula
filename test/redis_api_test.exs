@@ -5,21 +5,33 @@ defmodule Radicula.RedisApiTest do
 
   describe "basic redis clent tests" do
     setup do
-      {:ok, pid} = RedisSrv.start_link() |> IO.inspect()
-      {:ok, %{}}
+      {:ok, client} = RedisSrv.start_link()
+
+      context = %{
+        random_n: :rand.uniform(1000) + 1,
+        client: client
+      }
+
+      {:ok, context}
     end
 
-    test "setting values to redis list and reading from it" do
-
+    test "setting value to redis list" do
       range = 1..1000
+
       Enum.each(range, fn x ->
         n = :rand.uniform(1000) + 1
-        RedisSrv.set(n)
-        RedisSrv.get()
+        RedisSrv.set(:list, n)
+        RedisSrv.pop()
       end)
 
-      assert RedisSrv.set("term") == "1"
-      assert RedisSrv.get() == "term"
+      assert RedisSrv.set(:list, "end") == "1"
+      assert RedisSrv.pop() == "end"
+    end
+
+    test "setting value to redis set", %{random_n: n} do
+      assert RedisSrv.set(:set, n) == "1"
+      RedisSrv.remove(:stest, n)
+      assert RedisSrv.get_members(:stest) == []
     end
   end
 end

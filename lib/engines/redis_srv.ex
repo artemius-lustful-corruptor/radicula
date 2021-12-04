@@ -3,20 +3,6 @@ defmodule Radicula.RedisSrv do
 
   alias Radicula.RedisClient, as: R
 
-  # API
-
-  # TODO
-  """
-  . Writing test for writing and reading redis_api.ex to testing redis docker container
-  0. Creating generator_api, filtrator_api, redis_api, generator_test, filtrator_test, generator_srv, filtrator_srv, generator_superviesr
-  1. Integrate Redis client into generator_srv, filtrator_srv *terminate case
-  3. Creating api modules for Redis: [set, get, isPrime?]
-  4. Testing for read and write to list
-
-  docker run -p 6379:6379 --name redis_cont -e ALLOW_EMPTY_PASSWORD=yes bitnami/redis:latest
-
-  """
-
   # Client Api
 
   @doc false
@@ -24,16 +10,25 @@ defmodule Radicula.RedisSrv do
     GenServer.start_link(__MODULE__, %{}, name: __MODULE__)
   end
 
-  def set(value, type) do
+  def set(type, value) do
     GenServer.call(__MODULE__, {:set, {type, value}})
   end
 
   def pop() do
+    # FIXME get value from config
     GenServer.call(__MODULE__, {:get, :ltest})
   end
 
-  def get_members(type, key) do
-    GenServer.call(__MODULE__, {:get_members, type, key})
+  def get_members(key) do
+    GenServer.call(__MODULE__, {:get_members, key})
+  end
+
+  def remove(queue, key) do
+    GenServer.call(__MODULE__, {:remove, queue, key})
+  end
+
+  def length(queue) do
+    GenServer.call(__MODULE__, {:length, queue})
   end
 
   # Server
@@ -70,9 +65,25 @@ defmodule Radicula.RedisSrv do
 
   @doc false
   @impl true
-  def handle_call({:get_members, type, key}, _, state) do
+  def handle_call({:length, queue}, _, state) do
     %{client: client} = state
-    res = client |> R.get_members(type, key)
+    res = client |> R.length(queue)
+    {:reply, res, state}
+  end
+
+  @doc false
+  @impl true
+  def handle_call({:get_members, key}, _, state) do
+    %{client: client} = state
+    res = client |> R.get_members(key)
+    {:reply, res, state}
+  end
+
+  @doc false
+  @impl true
+  def handle_call({:remove, queue, key}, _, state) do
+    %{client: client} = state
+    res = client |> R.remove(queue, key)
     {:reply, res, state}
   end
 
