@@ -1,44 +1,78 @@
 defmodule Radicula.RedisSrv do
+  @moduledoc """
+  Redis's worker server with client in state
+  """
+
   use GenServer
 
   alias Radicula.RedisClient, as: R
 
+  @list Application.get_env(:radicula, :redis_list)
+
   # Client Api
 
   @doc false
-  def start_link() do
+  def start_link(_) do
     GenServer.start_link(__MODULE__, %{}, name: __MODULE__)
   end
+
+  @doc """
+  Synchronous request for setting value for Redis set or list
+  """
+  @spec set(atom(), integer()) :: String.t()
+  def set(type, value)
 
   def set(type, value) do
     GenServer.call(__MODULE__, {:set, {type, value}})
   end
 
-  def pop() do
-    # FIXME get value from config
-    GenServer.call(__MODULE__, {:get, :ltest})
+  @doc """
+  Synchronous request for poping batched values from Redis list
+  """
+  @spec pop(integer()) :: any()
+  def pop(batch_size)
+
+  def pop(batch_size) do
+    GenServer.call(__MODULE__, {:get, @list, batch_size})
   end
+
+  @doc """
+  Synchronous request for getting members from Redis set
+  """
+  @spec get_members(atom()) :: any()
+  def get_members(key)
 
   def get_members(key) do
     GenServer.call(__MODULE__, {:get_members, key})
   end
 
+  @doc """
+  Synchronous request for removing key from Redis set
+  """
+  @spec remove(atom(), String.t()) :: any()
+  def remove(queue, key)
+
   def remove(queue, key) do
     GenServer.call(__MODULE__, {:remove, queue, key})
   end
+
+  @doc """
+  Synchronous request for getting length from Redis list
+  """
+  @spec length(atom()) :: integer()
+  def length(queue)
 
   def length(queue) do
     GenServer.call(__MODULE__, {:length, queue})
   end
 
-  # Server
+  # Callbacks
   @doc false
   @impl true
   def init(state) do
     {:ok, state, {:continue, :get_client}}
   end
 
-  # Callbacks
   @doc false
   @impl true
   def handle_continue(:get_client, state) do
@@ -57,9 +91,9 @@ defmodule Radicula.RedisSrv do
 
   @doc false
   @impl true
-  def handle_call({:get, key}, _, state) do
+  def handle_call({:get, key, batch_size}, _, state) do
     %{client: client} = state
-    res = client |> R.pop(key)
+    res = client |> R.pop(key, batch_size)
     {:reply, res, state}
   end
 

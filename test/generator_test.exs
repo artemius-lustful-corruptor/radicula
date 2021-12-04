@@ -6,38 +6,45 @@ defmodule Radicula.GeneratorTest do
 
   describe "generator test to" do
     setup do
-      {:ok, client} = RedisSrv.start_link()
+      {:ok, client} = RedisSrv.start_link([])
 
       context = %{
-        client: client
+        client: client,
+        servers: Application.get_env(:radicula, :servers),
+        bound: Application.get_env(:radicula, :bound),
+        set: Application.get_env(:radicula, :redis_set),
+        list: Application.get_env(:radicula, :redis_list)
       }
 
-      on_exit(&clear_list/0)
+      on_exit(fn -> clear_list(context) end)
 
       {:ok, context}
     end
 
-    test "start server for 1 second", %{client: rc} do
-      length = RedisSrv.length(:ltest) |> String.to_integer()
+    test "start server for 1 second", context do
+      %{servers: s, bound: b, list: l} = context
+      length = RedisSrv.length(l) |> String.to_integer()
       assert length == 0
-      GS.start_link()
+      start_supervised({GS, %{servers: s, bound: b}})
       :timer.sleep(1000)
-      GS.stop()
-      length = RedisSrv.length(:ltest) |> String.to_integer()
-      assert length == 3000
+      stop_supervised(GS)
+      length = RedisSrv.length(l) |> String.to_integer()
+      assert length == s
     end
 
-    test "frequency measure for 10 seconds", %{client: rc} do
+    test "frequency measure for 10 seconds", context do
+      %{servers: s, bound: b, list: l} = context
       seconds = 20
-      GS.start_link()
+
+      start_supervised({GS, %{servers: s, bound: b}})
       :timer.sleep(1000 * seconds)
-      GS.stop()
-      length = RedisSrv.length(:ltest) |> String.to_integer()
-      assert 3000 - length / seconds < 400
+      stop_supervised(GS)
+      length = RedisSrv.length(l) |> String.to_integer()
+      assert s - length / seconds < 200
     end
   end
 
-  defp clear_list() do
-    Exredis.Api.del(:ltest)
+  defp clear_list(%{list: l}) do
+    Exredis.Api.del(l)
   end
 end

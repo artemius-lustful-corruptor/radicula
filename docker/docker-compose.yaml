@@ -1,0 +1,18 @@
+--- 
+networks: 
+  app-tier: 
+    driver: bridge
+services: 
+  radicula: 
+    build: "."
+    networks: 
+      - app-tier
+  redis: 
+    environment: 
+      - ALLOW_EMPTY_PASSWORD=yes
+    image: "bitnami/redis:latest"
+    networks: 
+      - app-tier
+    ports: 
+      - "6379:6379"
+version: "3"
