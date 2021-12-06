@@ -1,18 +1,19 @@
---- 
-networks: 
-  app-tier: 
+version: '2'
+
+networks:
+  app-tier:
     driver: bridge
-services: 
-  radicula: 
-    build: "."
-    networks: 
-      - app-tier
-  redis: 
-    environment: 
+
+services:
+  redis:
+    image: 'bitnami/redis:latest'
+    environment:
       - ALLOW_EMPTY_PASSWORD=yes
-    image: "bitnami/redis:latest"
-    networks: 
+    networks:
       - app-tier
-    ports: 
-      - "6379:6379"
-version: "3"
+  radicula:
+    build:
+      context: ../
+      dockerfile: ./docker/Dockerfile
+    networks:
+      - app-tier

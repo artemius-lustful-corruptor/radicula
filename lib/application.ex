@@ -7,7 +7,6 @@ defmodule Radicula.Application do
         :prod ->
           s = Application.get_env(:radicula, :servers)
           b = Application.get_env(:radicula, :bound)
-
           [
             Radicula.RedisSrv,
             {Radicula.GeneratorSuperviser, %{servers: s, bound: b}},

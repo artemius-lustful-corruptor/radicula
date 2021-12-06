@@ -1,9 +1,18 @@
-FROM elixir:1.12.0-alpine AS build
+FROM ubuntu:20.04
 
 MAINTAINER Artem Salagaev: gitsartem@gmail.com
 
 # prepare build dir
 WORKDIR /app
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && \
+    apt-get install -y curl gnupg
+RUN curl -O https://packages.erlang-solutions.com/erlang-solutions_2.0_all.deb && dpkg -i erlang-solutions_2.0_all.deb
+RUN apt-get update && \
+    apt-get install -y esl-erlang \
+                       elixir \
+                       git
 
 # install hex + rebar
 RUN mix local.hex --force && \
@@ -13,25 +22,16 @@ RUN mix local.hex --force && \
 ENV MIX_ENV=prod
 
 # install mix dependencies
-COPY ../mix.exs mix.lock ./
-COPY ../config config
+COPY mix.exs mix.lock ./
+COPY config config
 RUN mix do deps.get, deps.compile
 
 # compile and build release
-COPY ../lib lib
+COPY lib lib
 RUN mix do compile, release
 
-# prepare release image
-FROM alpine:3.9 AS app
-RUN apk add --no-cache openssl ncurses-libs
 
-WORKDIR /app
-
-RUN chown nobody:nobody /app
-
-USER nobody:nobody
-
-COPY --from=build --chown=nobody:nobody /app/_build/prod/rel/radicula ./
+COPY _build/prod/rel/radicula ./
 
 ENV HOME=/app
 
