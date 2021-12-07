@@ -1,13 +1,12 @@
 use Mix.Config
 
 config :radicula,
-  # ms
-  interval: 1000,
+  interval: 1000, #ms
   batch_size: 1000,
-  redis_list: :ltest,
-  redis_set: :stest,
-  bound: 1000,
-  servers: 3000,
+  redis_list: :ltest2, #QueueKey
+  redis_set: :stest2, #ResultSetKey
+  bound: 1000,  # N
+  servers: 3000, 
   environment: Mix.env()
 
 

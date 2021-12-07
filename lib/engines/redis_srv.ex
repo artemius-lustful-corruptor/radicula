@@ -8,6 +8,7 @@ defmodule Radicula.RedisSrv do
   alias Radicula.RedisClient, as: R
 
   @list Application.get_env(:radicula, :redis_list)
+  @set Application.get_env(:radicula, :redis_set)
 
   # Client Api
 
@@ -133,11 +134,11 @@ defmodule Radicula.RedisSrv do
   defp set(client, type, value) do
     case type do
       :list ->
-        key = :ltest
+        key = @list
         client |> R.push(key, value)
 
       :set ->
-        key = :stest
+        key = @set
         client |> R.set(key, value)
     end
   end

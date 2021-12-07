@@ -3,9 +3,9 @@ use Mix.Config
 config :logger, level: :info
 
 config :exredis,
-  host: "redis",
-  port: 6379,
+  host: "redis", #RedisHost
+  port: 6379, #RedisPort
   password: "",
-  db: 0,
+  db: "test", #RedisDB
   reconnect: 10,
   max_queue: :infinity

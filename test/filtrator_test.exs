@@ -7,17 +7,20 @@ defmodule Radicula.FiltratorTest do
     setup do
       {:ok, client} = RedisSrv.start_link([])
 
-      on_exit(fn ->
-        Exredis.Api.del(:stest)
-        Exredis.Api.del(:ltest)
-      end)
+      set = Application.get_env(:radicula, :redis_set)
+      list = Application.get_env(:radicula, :redis_list)
 
       context = %{
         client: client,
-        set: Application.get_env(:radicula, :redis_set),
+        set: set,
         servers: Application.get_env(:radicula, :servers),
         bound: Application.get_env(:radicula, :bound)
       }
+
+      on_exit(fn ->
+        Exredis.Api.del(set)
+        Exredis.Api.del(list)
+      end)
 
       {:ok, context}
     end
@@ -54,6 +57,5 @@ defmodule Radicula.FiltratorTest do
       assert RedisSrv.get_members(set) |> length() > 0
       stop_supervised(GeneratorSuperviser)
     end
-    
   end
 end
