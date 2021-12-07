@@ -1,5 +1,8 @@
 defmodule RadiculaTest do
   use ExUnit.Case
+
+  alias Radicula.{Filtrator, GeneratorSuperviser}
+
   doctest Radicula
 
   test "greets the world" do
